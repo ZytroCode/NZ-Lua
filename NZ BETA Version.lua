@@ -3,6 +3,8 @@ admins = {"Zeroo#7497", "Omarsdpie#0633"}
 mods = {}
 
 gameStarted = false
+win = false
+
 mainModes = {teams = false, elimination = false, solo = false}
 mode = "Racing"
 
@@ -77,8 +79,8 @@ function eventTextAreaCallback(id, player, callback)
 					point2 = 0
 					point3 = 0
 					point4 = 0
-					newMap()
 					gameStarted = true
+					newMap()
 				end
 			end
 		elseif id == 999 then
@@ -197,6 +199,11 @@ function eventChatCommand(name, command)
 				score = arg[2]
 			if gameStarted == false then startTeams() else setMapName() end
 			end
+		elseif arg[1] == "reset" or arg[1] == "rs" then
+			gameStarted = false
+			resetScore()
+			startMode(startTeams)
+			newMap()
 		elseif arg[1] == "s" or arg[1] == "skip" or arg[1] == "prox" then
 			newMap()
 		elseif arg[1] == "repeat" or arg[1] == "rt" then
@@ -231,6 +238,8 @@ function eventPlayerWon(plr, TT, wonTime)
 				tfm.exec.setGameTime(5)
 				playerWon(plr)
 				setMapName()
+				lightning1 = tfm.exec.addImage("1772bc01a81.png", "$Zeroo#7497", 0, -50)
+				lightning2 = tfm.exec.addImage("1772bc01a81.png", "$Zeroo#7497", 700, -50)
 			end
 		end
 	end
@@ -298,8 +307,9 @@ function eventNewGame()
 		first = false
 		setMapName()
 		setGameTime()
-		-- if getMostScore() ~= false then
-		tfm.exec.addImage(crown, "$Zeroo#7497")
+		if getMostScore() ~= false then
+			tfm.exec.addImage("17d5f617ea7.png", "$"..getMostScore(), -40, -81, nil, 0.04, 0.04)
+		end
 	end
 
 	setPlayerNameColor()
@@ -314,6 +324,19 @@ end
 
 -- Starting a new map
 function newMap()
+	if win then
+		win = false
+		gameStarted = false
+		ui.removeTextArea(99)
+		ui.removeTextArea(97)
+		ui.removeTextArea(96)
+	end
+	if not gameStarted then
+		tfm.exec.newGame(proto)
+		tfm.exec.setGameTime(99999)
+		setMapName()
+		startMode(startTeams)
+	else
 	bcMaps = {"#3", "#13"}
 	bootcampMap = bcMaps[math.random(#bcMaps)]
 	burlasMap = burlaMaps[math.random(#burlaMaps)]
@@ -335,6 +358,7 @@ function newMap()
 	elseif mode == "RcDef" then
 		tfm.exec.newGame(rcdefMap)
 	end
+end
 end
 
 -- Starting any mode from a function
@@ -452,7 +476,7 @@ end
 
 -- Setting the game time
 function setGameTime()
-	if gameStarted then
+	if gameStarted and not win then
 		if mode == "Vanilla" then tfm.exec.setGameTime(110)
 		elseif mode == "Racing" then tfm.exec.setGameTime(63)
 		elseif mode == "P7" then tfm.exec.setGameTime(63)
@@ -536,7 +560,6 @@ function contains(list, x)
 end
 
 function playerWon(player)
-	ui.addTextArea(100, "", nil, 5, 5, 790, 400, 0x000001, 0x000000, 0.3)
 	if table.contain(team1, player) then
 		ui.addTextArea(99, "<font size='35'><p align='center'><i><font color='#ff0000'> Team1 Scored!\nThanks to "..player.."</font>", nil, 0, 140, 800, 100, 0x000000, 0x000000, 0, true)
 		point1 = point1 + 1
@@ -582,6 +605,11 @@ function playerWon(player)
 			for i,n in pairs(team1) do tfm.exec.killPlayer(n) end
 		end
 	end
+	if tonumber(point1) >= tonumber(score) or tonumber(point2) >= tonumber(score) or tonumber(point3) >= tonumber(score) or tonumber(point4) >= tonumber(score) then
+		tfm.exec.newGame(proto)
+		win = true
+		tfm.exec.setGameTime(10)
+	else ui.addTextArea(100, "", nil, 5, 5, 790, 400, 0x000001, 0x000000, 0.3) end
 end
 
 function getMostScore()
