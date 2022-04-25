@@ -24,7 +24,7 @@ point2 = 0
 point3 = 0
 point4 = 0
 
-ignoredTexts = {999, 998, 997}
+ignoredTexts = {999, 998, 997, 996, 995, 994}
 showInfoPlayers = {}
 
 -- Maps
@@ -86,10 +86,16 @@ function eventTextAreaCallback(id, player, callback)
 			end
 		elseif id == 999 then
 			respawn = not respawn
-			ui.addTextArea(999, "<p align='center'>Respawn: <a href='event:respawn'>"..(respawn and "<font color='#5ECE52'>on</font>" or not respawn and "<font color='#CE5252'>off</font>").."</a>", nil, 600, -25, 100, 20, 0x000000, 0xffff00, 0.6)
+			drawRespawn()
 		elseif id == 998 then
 			autoJoin = not autoJoin
-			ui.addTextArea(998, "<p align='center'>AutoJoin: <a href='event:autojoin'>"..(autoJoin and "<font color='#5ECE52'>on</font>" or not autoJoin and "<font color='#CE5252'>off</font>").."</a>", nil, 485, -25, 100, 20, 0x000000, 0xffff00, 0.6)
+			drawAutoJoin()
+		elseif id == 995 then
+			newMap()
+		elseif id == 994 then
+			ui.removeTextArea(99)
+			ui.removeTextArea(98)
+			tfm.exec.newGame(tfm.get.room.currentMap)
 		elseif id == 51 then
 			if callback == "racing" then
 				mode = "Racing"
@@ -179,6 +185,8 @@ function eventTextAreaCallback(id, player, callback)
 
 	-- Everyone can access this area
 	if id == 997 then
+
+	elseif id == 996 then
 		if callback == "info" then
 			if contains(showInfoPlayers, player) then
 				ui.removeTextArea(900, player)
@@ -195,7 +203,7 @@ function eventChatCommand(name, command)
 		table.insert(arg,argument)
 	end
 	if isAdmin(name) then
-		if (arg[1] == "d" or arg[1] == "score" or arg[1] == "point" or arg[1] == "p") and tonumber(arg[2]) ~= nil then
+		if (arg[1] == "d" or arg[1] == "score" or arg[1] == "point" or arg[1] == "punto") and tonumber(arg[2]) ~= nil then
 			if tonumber(arg[2]) > 0 and tonumber(arg[2]) <= 999 then
 				score = arg[2]
 			if gameStarted == false then startTeams() else setMapName() end
@@ -268,9 +276,7 @@ end
 -- Checking for a new player that join
 function eventNewPlayer(player, y)
 	for n,p in pairs(tfm.get.room.playerList) do
-		ui.addTextArea(999, "<p align='center'>Respawn: <a href='event:respawn'>"..(respawn and "<font color='#5ECE52'>on</font>" or not respawn and "<font color='#CE5252'>off</font>").."</a>", player, 600, -25, 100, 20, 0x000000, 0xffff00, 0.6)
-		ui.addTextArea(998, "<p align='center'>AutoJoin: <a href='event:autojoin'>"..(autoJoin and "<font color='#5ECE52'>on</font>" or not autoJoin and "<font color='#CE5252'>off</font>").."</a>", player, 485, -25, 100, 20, 0x000000, 0xffff00, 0.6)
-		ui.addTextArea(997, "<p align='center'><i><b><font size='14'><a href='event:info'>i</a>", player, 30, -25, 20, 20, 0x000000, 0xeeff10, 0.5)
+		drawNav()
 	end
 
 	if gameStarted then
@@ -343,7 +349,7 @@ function newMap()
 	burlasMap = burlaMaps[math.random(#burlaMaps)]
 	p1Map = p1Maps[math.random(#p1Maps)]
 	rcdefMap = rcDefMaps[math.random(#rcDefMaps)]
-	
+
 	ui.removeTextArea(99)
 
 	if mode == "Racing" then
@@ -379,16 +385,14 @@ function startMode(func)
 	ui.addTextArea(55, "<p align='center'><font size='9.5'><b><a href='event:p1'>P1</a>", nil, 805, 130, 75, 18, 0x000001, 0x000000, 0.8, false)
 	ui.addTextArea(56, "<p align='center'><font size='9.5'><b><a href='event:rcdef'>RcDef</a>", nil, 805, 158, 75, 18, 0x000001, 0x000000, 0.8, false)
 	ui.addTextArea(60, "<p align='center'><font size='9.5'><b><a href='event:mix'>Mix</a>", nil, 805, 186, 75, 18, 0x000001, 0x000000, 0.8, false)
-	ui.addTextArea(999, "<p align='center'>Respawn: <a href='event:respawn'>"..(respawn and "<font color='#5ECE52'>on</font>" or not respawn and "<font color='#CE5252'>off</font>").."</a>", nil, 600, -25, 100, 20, 0x000000, 0xffff00, 0.6)
-	ui.addTextArea(998, "<p align='center'>AutoJoin: <a href='event:autojoin'>"..(autoJoin and "<font color='#5ECE52'>on</font>" or not autoJoin and "<font color='#CE5252'>off</font>").."</a>", nil, 485, -25, 100, 20, 0x000000, 0xffff00, 0.6)
-	ui.addTextArea(997, "<p align='center'><i><b><font size='14'><a href='event:info'>i</a>", nil, 30, -25, 20, 20, 0x000000, 0xeeff10, 0.5)
+	drawNav()
 	func()
 end
 
 -- Choosing the main mode of the game function
 function chooseMainMode(name)
 	ui.addTextArea(0, "<p align='center'><font size='13'>Choose the main mode of the game</font></p>", name, 275, 75, 250, 275, 0x000000, 0xffffff, 0.85, false)
-	
+
 	ui.addTextArea(1, "<p align='center'><font size='17'><a href='event:teams'>Teams</font></p>", name, 275, 125, 250, 275, 0x000000, 0x000000)
 	ui.addTextArea(2, "<p align='center'><font size='17'><a href='event:elimination'>Elimination</font></p>", name, 275, 150, 250, 275, 0x000000, 0x000000)
 	ui.addTextArea(3, "<p align='center'><font size='17'><a href='event:solo'>Solo</font></p>", name, 275, 175, 250, 275, 0x000000, 0x000000)
@@ -415,7 +419,7 @@ function startTeams()
 
 		ui.addTextArea(1001, "<p align='center'><font size='15' color='#ff0000'>\n"..getPlayersNL(team1), nil, 230, 50, 150, 275, 0x000001, 0xff0000, 0.7, false)
 		ui.addTextArea(1002, "<p align='center'><font size='15' color='#36ffd7'>\n"..getPlayersNL(team2), nil, 420, 50, 150, 275, 0x000001, 0x36ffd7, 0.7, false)
-		
+
 		ui.addTextArea(1005, "<p align='center'><font size='12' color='#ff0000'><b>Team 1", nil, 230, 50, 150, 0, 0x000000, 0xff0000, 0.3)
 		ui.addTextArea(1006, "<p align='center'><font size='12' color='#36ffd7'><b>Team 2", nil, 420, 50, 150, 0, 0x000000, 0x36ffd7, 0.3)
 
@@ -431,7 +435,7 @@ function startTeams()
 		ui.addTextArea(1001, "<p align='center'><font size='15' color='#ff0000'>\n"..getPlayersNL(team1), nil, 325, 50, 150, 275, 0x000001, 0xff0000, 0.7, false)
 		ui.addTextArea(1002, "<p align='center'><font size='15' color='#36ffd7'>\n"..getPlayersNL(team2), nil, 520, 50, 150, 275, 0x000001, 0x36ffd7, 0.7, false)
 		ui.addTextArea(1003, "<p align='center'><font size='15' color='#ffff00'>\n"..getPlayersNL(team3), nil, 130, 50, 150, 275, 0x000001, 0xffff00, 0.7, false)
-		
+
 		ui.addTextArea(1005, "<p align='center'><font size='12' color='#ff0000'><b>Team 1", nil, 325, 50, 150, 0, 0x000000, 0xff0000, 0.3)
 		ui.addTextArea(1006, "<p align='center'><font size='12' color='#36ffd7'><b>Team 2", nil, 520, 50, 150, 0, 0x000000, 0x36ffd7, 0.3)
 		ui.addTextArea(1007, "<p align='center'><font size='12' color='#ffff00'><b>Team 3", nil, 130, 50, 150, 0, 0x000000, 0xffff00, 0.3)
@@ -447,7 +451,7 @@ function startTeams()
 		end
 		ui.addTextArea(1001, "<p align='center'><font size='15' color='#ff0000'>\n"..getPlayersNL(team1), nil, 230, 50, 150, 275, 0x000001, 0xff0000, 0.7, false)
 		ui.addTextArea(1002, "<p align='center'><font size='15' color='#36ffd7'>\n"..getPlayersNL(team2), nil, 420, 50, 150, 275, 0x000001, 0x36ffd7, 0.7, false)
-		
+
 		ui.addTextArea(1005, "<p align='center'><font size='12' color='#ff0000'><b>Team 1", nil, 230, 50, 150, 0, 0x000000, 0xff0000, 0.3)
 		ui.addTextArea(1006, "<p align='center'><font size='12' color='#36ffd7'><b>Team 2", nil, 420, 50, 150, 0, 0x000000, 0x36ffd7, 0.3)
 
@@ -471,12 +475,12 @@ end
 
 -- Starting the elimination mode function
 function startElimination()
-	
+
 end
 
 -- Starting the solo mode function
 function startSolo()
-	
+
 end
 
 -- Setting the game time
@@ -757,6 +761,46 @@ function table.contain(t,obj)
 		end
 	end
 	return false
+end
+
+-- Drawing Respawn function
+function drawRespawn()
+	ui.addTextArea(999, "<p align='center'>Respawn: <a href='event:respawn'>"..(respawn and "<font color='#5ECE52'>on</font>" or not respawn and "<font color='#CE5252'>off</font>").."</a>", nil, 140, -25, 100, 20, 0x000000, 0xffff00, 0.6)
+end
+
+-- Drawing AutoJoin function
+function drawAutoJoin()
+	ui.addTextArea(998, "<p align='center'>AutoJoin: <a href='event:autojoin'>"..(autoJoin and "<font color='#5ECE52'>on</font>" or not autoJoin and "<font color='#CE5252'>off</font>").."</a>", nil, 250, -25, 100, 20, 0x000000, 0xffff00, 0.6)
+end
+
+-- Drawing Commands function
+function drawCommands()
+	ui.addTextArea(997, "<p align='center'><a href='event:commands'>Commands</a>", nil, 30, -25, 100, 20, 0x000000, 0xffff00, 0.6)
+end
+
+-- Drawing Info function
+function drawInfo()
+	ui.addTextArea(996, "<p align='center'><i><b><font size='14'><a href='event:info'>i</a>", nil, 0, -25, 20, 20, 0x000000, 0xffff10, 0.6)
+end
+
+-- Drawing Skip function
+function drawSkip()
+	ui.addTextArea(995, "<p align='center'><b><a href='event:skip'>Skip</a>", nil, 600, -25, 0, 20, 0x000000, 0xffff00, 0.6)
+end
+
+-- Drawing Repeat function
+function drawRepeat()
+	ui.addTextArea(994, "<p align='center'><b><a href='event:repeat'>Repeat</a>", nil, 640, -25, 0, 20, 0x000000, 0xffff00, 0.6)
+end
+
+-- Drawing all function
+function drawNav()
+	drawRespawn()
+	drawAutoJoin()
+	drawCommands()
+	drawInfo()
+	drawSkip()
+	drawRepeat()
 end
 
 -- Showing the start board function
